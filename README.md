@@ -14,3 +14,9 @@
 You will eventually see a fast feed of logs from the KubeAPI server complaining about `illegal resource version from storage: 0` indefinately.
 
 For some reason it does not work. However under the `works-with-k3s` directory you will find an example of it working as expected.
+
+## Clean up
+
+```bash
+kind delete cluster
+```
