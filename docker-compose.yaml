@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  nats:
+    image: 'nats:2.10.5'
+    command: -js -m 8222 -DV
+  
+  kine:
+    image: rancher/kine:v0.11.4
+    restart: unless-stopped
+    command:
+      - --endpoint=nats://nats:4222?noEmbed=true
+      - --debug
+
+  kubeapi:
+    image: registry.k8s.io/kube-apiserver:v1.29.1
+    restart: unless-stopped
+    command: 
+      - kube-apiserver 
+      - --etcd-servers=kine:2379 
+      - --service-account-signing-key-file=/var/run/kubernetes/apiserver.key 
+      - --service-account-key-file=/var/run/kubernetes/apiserver.key
+      - --service-account-issuer=/var/run/kubernetes/apiserver.crt
+
+  k3s-kubeapi:
+    image: "rancher/k3s:v1.29.1-k3s2"
+    command: 
+      - server 
+      - --datastore-endpoint=nats://nats:4222
+      - --flannel-backend=none
+      - --egress-selector-mode=disabled
+      - --disable-agent
+      - --disable-cloud-controller
+      - --disable-helm-controller
+      - --disable-network-policy
+      - --disable=servicelb
+      - --disable=traeffik
